@@ -117,6 +117,7 @@ public class ManageApplications extends InstrumentedPreferenceFragment
     private static final String EXTRA_SORT_ORDER = "sortOrder";
     private static final String EXTRA_SHOW_SYSTEM = "showSystem";
     private static final String EXTRA_SHOW_SUBSTRATUM = "showSubstratum";
+    private static final String EXTRA_SHOW_SUBSTRATUM_ICONS = "showSubstratumIcons";
     private static final String EXTRA_HAS_ENTRIES = "hasEntries";
     private static final String EXTRA_HAS_BRIDGE = "hasBridge";
 
@@ -147,7 +148,8 @@ public class ManageApplications extends InstrumentedPreferenceFragment
     public static final int FILTER_APPS_WRITE_SETTINGS = 11;
     public static final int FILTER_APPS_INSTALL_SOURCES = 12;
     public static final int FILTER_APPS_SUBSTRATUM = 13;
-    public static final int FILTER_APPS_COUNT = 14;  // This should always be the last entry
+    public static final int FILTER_APPS_SUBSTRATUM_ICONS = 14;
+    public static final int FILTER_APPS_COUNT = 15;  // This should always be the last entry
 
     // Mapping to string labels for the FILTER_APPS_* constants above.
     public static final @IdRes int[] FILTER_LABELS = new int[FILTER_APPS_COUNT];
@@ -225,6 +227,7 @@ public class ManageApplications extends InstrumentedPreferenceFragment
 
     // whether showing substratum overlays.
     private boolean mShowSubstratum;
+    private boolean mShowSubstratumIcons;
 
     private ApplicationsState mApplicationsState;
 
@@ -334,6 +337,8 @@ public class ManageApplications extends InstrumentedPreferenceFragment
             mSortOrder = savedInstanceState.getInt(EXTRA_SORT_ORDER, mSortOrder);
             mShowSystem = savedInstanceState.getBoolean(EXTRA_SHOW_SYSTEM, mShowSystem);
             mShowSubstratum = savedInstanceState.getBoolean(EXTRA_SHOW_SUBSTRATUM, mShowSubstratum);
+            mShowSubstratumIcons = savedInstanceState.getBoolean(EXTRA_SHOW_SUBSTRATUM_ICONS,
+                                                                 mShowSubstratumIcons);
         }
 
         mInvalidSizeStr = getActivity().getText(R.string.invalid_size_value);
@@ -529,6 +534,7 @@ public class ManageApplications extends InstrumentedPreferenceFragment
         outState.putInt(EXTRA_SORT_ORDER, mSortOrder);
         outState.putBoolean(EXTRA_SHOW_SYSTEM, mShowSystem);
         outState.putBoolean(EXTRA_SHOW_SUBSTRATUM, mShowSubstratum);
+        outState.putBoolean(EXTRA_SHOW_SUBSTRATUM_ICONS, mShowSubstratumIcons);
         outState.putBoolean(EXTRA_HAS_ENTRIES, mApplications.mHasReceivedLoadEntries);
         outState.putBoolean(EXTRA_HAS_BRIDGE, mApplications.mHasReceivedBridgeCallback);
     }
@@ -661,6 +667,10 @@ public class ManageApplications extends InstrumentedPreferenceFragment
                 && mListType != LIST_TYPE_HIGH_POWER);
         mOptionsMenu.findItem(R.id.hide_substratum).setVisible(mShowSubstratum
                 && mListType != LIST_TYPE_HIGH_POWER);
+        mOptionsMenu.findItem(R.id.show_substratum_icons).setVisible(!mShowSubstratumIcons
+                && mListType != LIST_TYPE_HIGH_POWER);
+        mOptionsMenu.findItem(R.id.hide_substratum_icons).setVisible(mShowSubstratumIcons
+                && mListType != LIST_TYPE_HIGH_POWER);
     }
 
     @Override
@@ -683,6 +693,11 @@ public class ManageApplications extends InstrumentedPreferenceFragment
             case R.id.show_substratum:
             case R.id.hide_substratum:
                 mShowSubstratum = !mShowSubstratum;
+                mApplications.rebuild(false);
+                break;
+            case R.id.show_substratum_icons:
+            case R.id.hide_substratum_icons:
+                mShowSubstratumIcons = !mShowSubstratumIcons;
                 mApplications.rebuild(false);
                 break;
             case R.id.reset_app_preferences:
@@ -1020,6 +1035,10 @@ public class ManageApplications extends InstrumentedPreferenceFragment
             if (!mManageApplications.mShowSubstratum) {
                 filterObj = new CompoundFilter(filterObj,
                         ApplicationsState.FILTER_SUBSTRATUM);
+            }
+            if (!mManageApplications.mShowSubstratumIcons) {
+                 filterObj = new CompoundFilter(filterObj,
+                        ApplicationsState.FILTER_SUBSTRATUM_ICONS);
             }
             switch (mLastSortMode) {
                 case R.id.sort_order_size:
